@@ -9,6 +9,7 @@ import {
   IProject,
   IProjectNeed,
   ISubProductFeature,
+  IUsedProduct,
 } from "@/types/types";
 import {
   Button,
@@ -32,75 +33,50 @@ const ProjectsPage = ({ params }: { params: { slug: string } }) => {
   const [features, setFeatures] = useState<IFeature[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [usedProducts, setUsedProducts] = useState<IUsedProduct[] | null>(null);
   const [selectedType, setSelectedType] = useState("Home");
   const projectFeatures = features?.filter((feature) => feature.projectId);
+
+  
   const { data: session, status } = useSession();
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get(
-          process.env.NEXT_PUBLIC_BACKEND_URL + `/projects/${params.slug}`
-        );
-        setData(response.data);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-        throw error;
-      }
-    };
-    const fetchNeeds = async () => {
-      try {
-        const response = await axios.get(
-          process.env.NEXT_PUBLIC_BACKEND_URL + "/admin/dashboard/projectneeds",
-          {
+        setLoading(true);
+  
+        const [projectResponse, needsResponse, featuresResponse, usedProductsResponse] = await Promise.all([
+          axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/projects/${params.slug}`),
+          axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/admin/dashboard/projectneeds`, {
             headers: {
               Authorization: `Bearer ${session?.user.token}`,
             },
-          }
-        );
-        setNeeds(response.data);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-        throw error;
-      }
-    };
-    const fetchFeatures = async () => {
-      try {
-        const response = await axios.get(
-          process.env.NEXT_PUBLIC_BACKEND_URL + "/admin/dashboard/features",
-          {
+          }),
+          axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/admin/dashboard/features`, {
             headers: {
               Authorization: `Bearer ${session?.user.token}`,
             },
-          }
-        );
-        setFeatures(response.data);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-        throw error;
-      }
-    };
-    const fetchUsedProducts = async () => {
-      try {
-        const response = await axios.get(
-          process.env.NEXT_PUBLIC_BACKEND_URL + "/admin/dashboard/projectneeds",
-          {
+          }),
+          axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/admin/dashboard/projectneeds`, {
             headers: {
               Authorization: `Bearer ${session?.user.token}`,
             },
-          }
-        );
-        setNeeds(response.data);
+          }),
+        ]);
+  
+        setData(projectResponse.data);
+        setNeeds(needsResponse.data);
+        setFeatures(featuresResponse.data);
+        setUsedProducts(usedProductsResponse.data);
       } catch (error) {
         console.error("Error fetching data:", error);
         throw error;
+      } finally {
+        setLoading(false);
       }
     };
+  
     if (session?.user.token) {
       fetchData();
-      fetchNeeds();
-      fetchFeatures();
-      fetchUsedProducts();
-      setLoading(false);
     }
   }, [session?.user.token, params.slug]);
   const {
@@ -119,6 +95,10 @@ const ProjectsPage = ({ params }: { params: { slug: string } }) => {
         for (let i = 0; i < value.length; i++) {
           postData.append("photos", value[i]);
         }
+      } else if (key === "title" && value === data?.title) {
+        postData.delete("title");
+      } else if (key === "description" && value === data?.description) {
+        postData.delete("description");
       } else if (key !== "photos" && value != null && value !== "") {
         postData.append(key, value);
       }
@@ -159,122 +139,143 @@ const ProjectsPage = ({ params }: { params: { slug: string } }) => {
         <PageWrapper>
           <h1 className="text-5xl">Project data</h1>
           <Card className="p-4 mt-8">
-            <form
-              className="flex flex-col gap-8"
-              onSubmit={handleSubmit(onSubmit)}
+          <form
+            className="flex flex-col gap-8"
+            onSubmit={handleSubmit(onSubmit)}
+          >
+            <Input
+              {...register("title")}
+              isDisabled={loading}
+              label="Title"
+              type="text"
+              name="title"
+              size="lg"
+              defaultValue={data?.title!}
+              id="title"
+              variant="underlined"
+              placeholder="Enter your title"
+            />
+            <Input
+              {...register("description")}
+              isDisabled={loading}
+              label="Description"
+              type="text"
+              name="description"
+              size="lg"
+              id="description"
+              defaultValue={data?.description!}
+              variant="underlined"
+              placeholder="Enter your description"
+            />
+            <Input
+              {...register("used_products_joint")}
+              isDisabled={loading}
+              label="Used products joint"
+              type="text"
+              name="used_products_joint"
+              size="lg"
+              id="used_products_joint"
+              variant="underlined"
+              placeholder="Enter your used products joint"
+            />
+            <Input
+              {...register("location")}
+              isDisabled={loading}
+              label="location"
+              type="text"
+              name="location"
+              size="lg"
+              id="location"
+              variant="underlined"
+              placeholder="Enter your location"
+            />
+            {needs && (
+              <Select
+                items={needs}
+                label="Needs"
+                isDisabled={loading}
+                color="default"
+                selectionMode="single"
+                {...register("needsId")}
+                variant="underlined"
+                placeholder="Select needs"
+              >
+                {(need) => (
+                  <SelectItem value={need._id} key={need._id}>
+                    {need.title}
+                  </SelectItem>
+                )}
+              </Select>
+            )}
+            {projectFeatures && (
+              <Select
+                items={projectFeatures}
+                label="Features"
+                isDisabled={loading}
+                color="default"
+                selectionMode="single"
+                {...register("featuresId")}
+                variant="underlined"
+                placeholder="Select features"
+              >
+                {(feature) => (
+                  <SelectItem value={feature._id} key={feature._id}>
+                    {feature.title}
+                  </SelectItem>
+                )}
+              </Select>
+            )}
+            {usedProducts && (
+              <Select
+                items={usedProducts}
+                label="Used Products"
+                isDisabled={loading}
+                color="default"
+                selectionMode="single"
+                {...register("usedProductsId")}
+                variant="underlined"
+                placeholder="Select used products"
+              >
+                {(usedProduct) => (
+                  <SelectItem value={usedProduct._id} key={usedProduct._id}>
+                    {usedProduct.title}
+                  </SelectItem>
+                )}
+              </Select>
+            )}
+            <RadioGroup
+              orientation="horizontal"
+              isDisabled={loading}
+              label="Select type of project"
+              value={selectedType}
+              onValueChange={setSelectedType}
             >
-              <Input
-                {...register("title")}
-                isDisabled={loading}
-                label="Title"
-                type="text"
-                name="title"
-                size="lg"
-                id="title"
-                variant="underlined"
-                defaultValue={data?.title!}
-                placeholder="Enter your title"
-              />
-              <Input
-                {...register("description")}
-                isDisabled={loading}
-                label="Description"
-                type="text"
-                name="description"
-                size="lg"
-                id="description"
-                variant="underlined"
-                defaultValue={data?.description}
-                placeholder="Enter your description"
-              />
-              <Input
-                {...register("used_products_joint")}
-                isDisabled={loading}
-                label="Used products joint"
-                type="text"
-                name="used_products_joint"
-                size="lg"
-                id="used_products_joint"
-                variant="underlined"
-                defaultValue={data?.used_products_joint}
-                placeholder="Enter your used products joint"
-              />
-              <Input
-                {...register("location")}
-                isDisabled={loading}
-                label="location"
-                type="text"
-                name="location"
-                size="lg"
-                id="location"
-                variant="underlined"
-                defaultValue={data?.location}
-                placeholder="Enter your location"
-              />
-              {needs && (
-                <Select
-                  items={needs}
-                  label="Needs"
-                  color="default"
-                  selectionMode="single"
-                  {...register("needsId")}
-                  variant="underlined"
-                  placeholder="Select needs"
-                >
-                  {(need) => (
-                    <SelectItem value={need._id} key={need._id}>
-                      {need.title}
-                    </SelectItem>
-                  )}
-                </Select>
-              )}
-              {features && (
-                <Select
-                  items={projectFeatures}
-                  label="Features"
-                  color="default"
-                  selectionMode="single"
-                  {...register("featuresId")}
-                  variant="underlined"
-                  placeholder="Select features"
-                >
-                  {(feature) => (
-                    <SelectItem value={feature._id} key={feature._id}>
-                      {feature.title}
-                    </SelectItem>
-                  )}
-                </Select>
-              )}
-              <RadioGroup
-                orientation="horizontal"
-                label="Select type of project"
-                value={selectedType}
-                onValueChange={setSelectedType}
-              >
-                <Radio value="Home">Home</Radio>
-                <Radio value="Business">Business</Radio>
-              </RadioGroup>
-              <ShadInput
-                id="file"
-                placeholder="file"
-                {...register("photos")}
-                color="primary"
-                required={false}
-                className="file:bg-primary flex items-center justify-center h-[64px] file:shadow-lg file:hover:cursor-pointer file:text-white hover:file:bg-primary/90 file:py-2 file:mt-1 file:px-4 file:rounded-large"
-                type="file"
-                multiple
-              />
+              <Radio value="Home">Home</Radio>
+              <Radio value="Business">Business</Radio>
+            </RadioGroup>
+            <ShadInput
+              id="file"
+              placeholder="file"
+              {...register("photos")}
+              disabled={loading}
+              color="primary"
+              required={false}
+              className="file:bg-primary flex items-center justify-center h-[64px] file:shadow-lg file:hover:cursor-pointer file:text-white hover:file:bg-primary/90 file:py-2 file:mt-1 file:px-4 file:rounded-large"
+              type="file"
+              multiple
+            />
 
-              <Button
-                className="rounded-[8px]"
-                size="lg"
-                color="primary"
-                type="submit"
-              >
-                Submit
-              </Button>
-            </form>
-          </Card>
+            <Button
+              className="rounded-[8px]"
+              size="lg"
+              color="primary"
+              isLoading={loading}
+              type="submit"
+            >
+              Submit
+            </Button>
+          </form>
+        </Card>
         </PageWrapper>
       )}
     </div>

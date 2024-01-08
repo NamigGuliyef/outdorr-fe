@@ -25,13 +25,16 @@ const ProductsPage = ({ params }: { params: { slug: string } }) => {
         const response = await axios.get(
           `${process.env.NEXT_PUBLIC_BACKEND_URL}/products/${params.slug}`
         );
+  
         setData(response.data);
-        setLoading(false);
       } catch (error) {
+        console.error("Error fetching data:", error);
         setError(true);
+      } finally {
+        setLoading(false);
       }
     };
-
+  
     fetchData();
   }, [params.slug]);
   const {

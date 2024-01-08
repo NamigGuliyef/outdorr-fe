@@ -25,124 +25,102 @@ const AboutPage = () => {
     handleSubmit,
     formState: { errors },
   } = useForm<FieldValues>();
-
+  
   const [whyData, setWhyData] = useState<WhyData[]>([]);
   const [aboutData, setAboutData] = useState<AboutOutdorr[] | null>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [updateSelect, setUpdateSelect] = useState(false);
   const [isEditingDescription, setIsEditingDescription] = useState(false);
-
+  
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get(
-          process.env.NEXT_PUBLIC_BACKEND_URL + "/why-outdorr"
-        );
-        setWhyData(response.data);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-        throw error;
-      }
-    };
-    const fetchAboutOutdorr = async () => {
-      try {
-        const response = await axios.get(
-          process.env.NEXT_PUBLIC_BACKEND_URL +
-            "/admin/dashboard/about-outdorr",
-          {
+        setLoading(true);
+  
+        const [responseWhy, responseAbout] = await Promise.all([
+          axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/why-outdorr`),
+          axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/admin/dashboard/about-outdorr`, {
             headers: {
               Authorization: `Bearer ${session?.user.token}`,
             },
-          }
-        );
-        setAboutData(response.data);
+          }),
+        ]);
+  
+        setWhyData(responseWhy.data);
+        setAboutData(responseAbout.data);
       } catch (error) {
         console.error("Error fetching data:", error);
-        throw error;
+      } finally {
+        setLoading(false);
       }
     };
-    const fetchDataAndUpdateLoading = async () => {
-      setLoading(true);
-      await fetchData();
-      setLoading(false);
-    };
-
-    fetchDataAndUpdateLoading();
-
+  
     if (session?.user.token) {
-      setLoading(true);
-      fetchAboutOutdorr().then(() => setLoading(false));
+      fetchData();
     }
   }, [session?.user.token, updateSelect]);
-
+  
   const onSubmit: SubmitHandler<FieldValues> = async (formSubmitData) => {
-    setLoading(true);
-
-    if (!formSubmitData.aboutData || formSubmitData.aboutData.length === 0) {
-      setLoading(false);
-      toast.error("Please select at least one About Data item.");
-      return;
-    }
-
-    const postData = {
-      title:
-        (formSubmitData?.title?.length > 1 &&
-          isEditingTitle &&
-          formSubmitData.title) ||
-        whyData[0].title,
-      description:
-        (formSubmitData?.description?.length > 1 &&
-          isEditingDescription &&
-          formSubmitData.description) ||
-        whyData[0].description,
-      about_outdorr: formSubmitData.aboutData.split(","),
-    };
-    const res = await axios
-      .patch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/admin/dashboard/why-outdorr/${
-          whyData && whyData[0]._id
-        }`,
+    try {
+      setLoading(true);
+  
+      if (!formSubmitData.aboutData || formSubmitData.aboutData.length === 0) {
+        toast.error("Please select at least one About Data item.");
+        return;
+      }
+  
+      const postData = {
+        title: (formSubmitData?.title?.length > 1 && isEditingTitle && formSubmitData.title) || whyData[0].title,
+        description:
+          (formSubmitData?.description?.length > 1 &&
+            isEditingDescription &&
+            formSubmitData.description) ||
+          whyData[0].description,
+        about_outdorr: formSubmitData.aboutData.split(","),
+      };
+  
+      await axios.patch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/admin/dashboard/why-outdorr/${whyData && whyData[0]._id}`,
         postData,
         {
           headers: {
             Authorization: `Bearer ${session?.user.token!}`,
           },
         }
-      )
-      .then((response) => {
-        setLoading(false);
-        toast.success("Successfully updated about!");
-      })
-      .catch((err) => {
-        setLoading(false);
-        toast.error("Error updating about.");
-      })
-      .finally(() => {
-        setIsEditingDescription(false);
-        setIsEditingTitle(false);
-      });
+      );
+  
+      toast.success("Successfully updated about!");
+    } catch (error) {
+      console.error("Error updating about:", error);
+      toast.error("Error updating about.");
+    } finally {
+      setLoading(false);
+      setIsEditingDescription(false);
+      setIsEditingTitle(false);
+    }
   };
+  
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const router = useRouter();
   const handleRefresh = () => {
     router.refresh();
     setUpdateSelect(!updateSelect);
   };
-  const handleClick = (id: string) => {
-    const res = axios
-      .delete(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/admin/dashboard/about-outdorr/${id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${session?.user.token}`,
-          },
-        }
-      )
-      .then((response) => {
-        handleRefresh();
-        router.push('/admin/dashboard/about')
+  
+  const handleClick = async (id: string) => {
+    try {
+      await axios.delete(`${process.env.NEXT_PUBLIC_BACKEND_URL}/admin/dashboard/about-outdorr/${id}`, {
+        headers: {
+          Authorization: `Bearer ${session?.user.token}`,
+        },
       });
+  
+      handleRefresh();
+      router.push('/admin/dashboard/about');
+    } catch (error) {
+      console.error("Error deleting about:", error);
+    }
   };
   return (
     <>

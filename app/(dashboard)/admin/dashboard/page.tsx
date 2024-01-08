@@ -37,6 +37,7 @@ export default async function Home() {
   const endpoints = [
     "/admin/dashboard/products",
     "/admin/dashboard/projects",
+    "/admin/dashboard/request-project",
     "/admin/dashboard/subproducts",
     "/admin/dashboard/features",
     "/admin/dashboard/subscribers",
@@ -47,8 +48,8 @@ export default async function Home() {
       fetchDataFromUrl(endpoint, session?.user.token!)
     )
   );
-
-  const [products, projects, subproducts, features, subscribers] = data;
+  
+  const [products, projects,requests, subproducts, features, subscribers] = data;
   return (
     <PageWrapper>
       <div className="container mt-6 mx-auto px-6 max-w-[1280px]">
@@ -151,7 +152,7 @@ export default async function Home() {
             </CardHeader>
             <CardContent>
               <div className="flex justify-between">
-                <p className="text-4xl font-bold text-right">1</p>
+                <p className="text-4xl font-bold text-right">{requests.length}</p>
                 <Link href={"/admin/dashboard/requests"}>
                   <Button
                     size="md"

@@ -57,10 +57,16 @@ export interface ISubProduct {
   photos: string[];
   featuresIds: ISubProductFeature[];
   specifications: ISubProductSpecification[];
-  productId: string;
+  applicationIds: IProductApplication[];
+  productId: IProduct;
+  statusCode: number;
+  photo: string;
+  subProductIds: ISubProduct[];
   createdAt: string;
   updatedAt: string;
 }
+export interface IExtendedSubproduct extends ISubProduct {}
+
 export interface ISubProducts {
   subproducts: ISubProduct[];
 }
@@ -167,7 +173,7 @@ export type WhyData = {
 };
 
 export interface IDesignData {
-  _id: ID;
+  _id: string;
   title: string;
   description: string;
   design_details: IDesignDetailsData[];
@@ -203,4 +209,32 @@ export interface IUsedProduct {
 
 export interface IUsedProducts {
   usedProducts: IUsedProduct[];
+}
+export interface IRequest {
+  _id: string;
+  first_name: string;
+  last_name: string;
+  phone_number: string;
+  email: string;
+  country: string;
+  state: string;
+  city: string;
+  zipcode: string;
+  main_structure_model: string;
+  width_in_feet: number;
+  projection_in_feet: number;
+  height_in_feet: number;
+  structure_situation: string;
+  structure_color: string;
+  window_and_doors: string[];
+  sunscreens: string[];
+  files: string[];
+  project_details: string;
+  about_us: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface IRequests {
+  requests: IRequest[];
 }

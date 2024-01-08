@@ -34,6 +34,8 @@ const NeedsPage = ({ params }: { params: { id: string } }) => {
   useEffect(() => {
     const fetchNeeds = async () => {
       try {
+        setLoading(true);
+  
         const response = await axios.get(
           `${process.env.NEXT_PUBLIC_BACKEND_URL}/admin/dashboard/projectneeds/${params.id}`,
           {
@@ -42,14 +44,15 @@ const NeedsPage = ({ params }: { params: { id: string } }) => {
             },
           }
         );
-        setLoading(false);
+  
         setData(response.data);
       } catch (error) {
         console.error("Error fetching data:", error);
+      } finally {
         setLoading(false);
       }
     };
-
+  
     if (session?.user.token) {
       fetchNeeds();
     }

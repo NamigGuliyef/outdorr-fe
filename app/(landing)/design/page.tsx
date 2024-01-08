@@ -1,10 +1,10 @@
-import RequestInfo from "@/components/Common/RequestInfo";
+import RequestInfo from "@/components/landing/Common/RequestInfo";
 import { PageWrapper } from "@/components/PageWrapper";
-import Section from "@/components/UI/Section";
-import Heading from "@/components/Views/TailoredDesignPage/Heading";
+import Section from "@/components/landing/UI/Section";
+import Heading from "@/components/landing/pages/TailoredDesignPage/Heading";
 import TailoredCard, {
   IDesign,
-} from "@/components/Views/TailoredDesignPage/TailoredCard";
+} from "@/components/landing/pages/TailoredDesignPage/TailoredCard";
 
 const getPageData = async () => {
   const res = await fetch(

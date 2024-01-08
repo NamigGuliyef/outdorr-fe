@@ -2,6 +2,7 @@
 "use client";
 import { PageWrapper } from "@/components/PageWrapper";
 import Preloader from "@/components/admin/Preloader";
+import { AxiosError } from 'axios';
 import { Input as ShadInput } from "@/components/admin/ui/input";
 import { ISubProduct } from "@/types/types";
 import { Button, Card, Input, Select, SelectItem } from "@nextui-org/react";
@@ -15,30 +16,41 @@ import toast from "react-hot-toast";
 
 const ApplicationsPage = () => {
   const [subproducts, setSubproducts] = useState<ISubProduct[] | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+const [isLoading, setIsLoading] = useState(false);
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<FieldValues>();
-  const { data: session, status } = useSession();
-  const router = useRouter();
-  useEffect(() => {
-    setIsLoading(true);
-    const fetchSubproducts = async () => {
-      const response = await axios.get(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/subproducts/`
-      );
+const {
+  register,
+  handleSubmit,
+  formState: { errors },
+} = useForm<FieldValues>();
+const { data: session, status } = useSession();
+const router = useRouter();
+
+useEffect(() => {
+  const fetchSubproducts = async () => {
+    try {
+      setIsLoading(true);
+
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/subproducts/`);
       setSubproducts(response.data);
+    } catch (error) {
+      console.error("Error fetching subproducts:", error);
+    } finally {
       setIsLoading(false);
-    };
-    fetchSubproducts();
-  }, []);
+    }
+  };
 
-  const onSubmit: SubmitHandler<FieldValues> = async (data, event) => {
+  if (session?.user.token) {
+    fetchSubproducts();
+  }
+}, [session?.user.token]);
+
+const onSubmit: SubmitHandler<FieldValues> = async (data, event) => {
+  try {
+    setIsLoading(true);
+
     const formData = new FormData();
-    for (let [key, value] of Object.entries(data)) {
+    for (const [key, value] of Object.entries(data)) {
       if (key === "photos" && value && value.length >= 1) {
         for (let i = 0; i < value.length; i++) {
           formData.append("photos", value[i]);
@@ -48,31 +60,29 @@ const ApplicationsPage = () => {
       }
     }
 
-    setIsLoading(true);
-    const res = await axios
-      .post(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/admin/dashboard/applications`,
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${session?.user.token}`,
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      )
-      .then((response) => {
-        setIsLoading(false);
-        toast.success("Successfully added application!");
-        router.push("/admin/dashboard/applications");
-        router.refresh();
-      })
-      .catch((err) => {
-        if (err?.response?.status === 409) {
-          toast.error("This application has already been added");
-        }
-        setIsLoading(false);
-      });
-  };
+    const response = await axios.post(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/admin/dashboard/applications`,
+      formData,
+      {
+        headers: {
+          Authorization: `Bearer ${session?.user.token}`,
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+
+    toast.success("Successfully added application!");
+    router.push("/admin/dashboard/applications");
+    router.refresh();
+  } catch (error) {
+    if ((error as AxiosError)?.response?.status === 409) {
+      toast.error("This application has already been added");
+    }
+    console.error("Error adding application:", error);
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   return (
     <>

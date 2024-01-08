@@ -1,6 +1,7 @@
-import Footer from "@/components/UI/Footer";
-import Header from "@/components/UI/Header";
+import Footer from "@/components/landing/UI/Footer";
+import Header from "@/components/landing/UI/Header";
 import { Toaster } from "react-hot-toast";
+import { PreloadResources } from "../preload";
 
 export default function LandingLayout({
   children,
@@ -10,6 +11,7 @@ export default function LandingLayout({
   return (
     <>
       <Header />
+      <PreloadResources />
       <Toaster
         position="top-center"
         reverseOrder={false}
@@ -21,8 +23,8 @@ export default function LandingLayout({
             background: "#333",
             borderColor: "#fff",
             color: "#fff",
-            maxWidth: '370px',
-            width: 'fit-content'
+            maxWidth: "370px",
+            width: "fit-content",
           },
         }}
       />

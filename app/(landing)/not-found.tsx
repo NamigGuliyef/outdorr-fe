@@ -11,22 +11,23 @@ import { ArrowRight } from "lucide-react";
 
 const NotFoundPage = () => {
   return (
-    <div className="container mt-24 mb-24 mx-auto px-6 max-w-[1280px]">
-      <div className="grid gap-14 grid-cols-1">
+    <div className="container mx-auto mb-24 mt-24 max-w-[1280px] px-6">
+      <div className="grid grid-cols-1 gap-14">
         <Card>
           <CardHeader>
             <CardTitle className="text-4xl">Oops!</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl mb-8">
+            <p className="mb-8 text-2xl">
               The page you&apos;re looking for doesn&apos;t exist.
             </p>
             <Link href="/" className="flex justify-end">
               <Button
                 size="md"
-                className="text-xl flex items-center"
+                className="flex items-center text-xl"
                 color="default"
-                variant="faded">
+                variant="faded"
+              >
                 Go Home
                 <ArrowRight
                   className="text-inherit"

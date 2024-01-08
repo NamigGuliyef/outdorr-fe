@@ -1,9 +1,9 @@
-import Preloader from "@/components/Common/Preloader";
-import Section from "@/components/UI/Section";
-import Hero from "@/components/Views/Requestpage/Hero";
+import Preloader from "@/components/landing/Common/Preloader";
+import Section from "@/components/landing/UI/Section";
+import Hero from "@/components/landing/pages/Requestpage/Hero";
 import dynamic from "next/dynamic";
 const DynamicRequestView = dynamic(
-  () => import("@/components/Views/Requestpage/RequestView"),
+  () => import("@/components/landing/pages/Requestpage/RequestView"),
   {
     loading: () => (
       <div className="min-h-screen">

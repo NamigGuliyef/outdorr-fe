@@ -1,7 +1,7 @@
 import { PageWrapper } from "@/components/PageWrapper";
-import Section from "@/components/UI/Section";
-import { Contact, Map } from "@/components/Views/Contactspage";
-import HaveAQuestion from "@/components/Views/Contactspage/HaveAQuestion";
+import Section from "@/components/landing/UI/Section";
+import { Contact, Map } from "@/components/landing/pages/Contactspage";
+import HaveAQuestion from "@/components/landing/pages/Contactspage/HaveAQuestion";
 import { IContacts } from "@/types/types";
 
 async function getData(): Promise<IContacts> {

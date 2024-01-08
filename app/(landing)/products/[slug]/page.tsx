@@ -1,10 +1,9 @@
-import Request from "@/components/Common/Request";
-import RequestInfo from "@/components/Common/RequestInfo";
-import Section from "@/components/UI/Section";
-import ProductSpecs from "@/components/Views/ProductDetailspage/ProductSpecs";
-import Hero from "@/components/Views/Productspage/Hero";
-import { ProductsHeading } from "@/components/Views/Productspage/ProductsHeading";
-import { SubProductsList } from "@/components/Views/Productspage/SubProductsList";
+import Request from "@/components/landing/Common/Request";
+import RequestInfo from "@/components/landing/Common/RequestInfo";
+import Section from "@/components/landing/UI/Section";
+import Hero from "@/components/landing/pages/Productspage/Hero";
+import { ProductsHeading } from "@/components/landing/pages/Productspage/ProductsHeading";
+import { SubProductsList } from "@/components/landing/pages/Productspage/SubProductsList";
 import { IProduct, ISubProduct } from "@/types/types";
 import { notFound } from "next/navigation";
 

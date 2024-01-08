@@ -21,14 +21,22 @@ const ProductsPage = ({ params }: { params: { id: string } }) => {
   const [isLoading, setIsLoading] = useState(false);
   const { data: session, status } = useSession();
   useEffect(() => {
-    setIsLoading(true);
     const fetchSubproducts = async () => {
-      const response = await axios.get(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/subproducts/`
-      );
-      setSubproducts(response.data);
-      setIsLoading(false);
+      try {
+        setIsLoading(true);
+  
+        const response = await axios.get(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/subproducts/`
+        );
+  
+        setSubproducts(response.data);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setIsLoading(false);
+      }
     };
+  
     fetchSubproducts();
   }, []);
   const onSubmit: SubmitHandler<FieldValues> = async (data, event) => {

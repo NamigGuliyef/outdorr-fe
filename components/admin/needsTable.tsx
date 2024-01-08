@@ -33,7 +33,7 @@ function NeedsTable({ needs }: INeeds) {
   const handleDeleteNeed = (productId: string) => {
     const res = axios
       .delete(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/admin/dashboard/needs/${productId}`,
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/admin/dashboard/projectneeds/${productId}`,
         {
           headers: {
             Authorization: `Bearer ${session?.user.token}`,

@@ -1,9 +1,9 @@
 export const dynamic = 'force-dynamic'
-import Request from "@/components/Common/Request";
-import Section from "@/components/UI/Section";
-import { Hero } from "@/components/Views/Projectspage";
-import ProjectsHeading from "@/components/Views/Projectspage/ProjectsHeading";
-import ProjectsList from "@/components/Views/Projectspage/ProjectsList";
+import Request from "@/components/landing/Common/Request";
+import Section from "@/components/landing/UI/Section";
+import { Hero } from "@/components/landing/pages/Projectspage";
+import ProjectsHeading from "@/components/landing/pages/Projectspage/ProjectsHeading";
+import ProjectsList from "@/components/landing/pages/Projectspage/ProjectsList";
 
 async function getData() {
   const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/projects`, {

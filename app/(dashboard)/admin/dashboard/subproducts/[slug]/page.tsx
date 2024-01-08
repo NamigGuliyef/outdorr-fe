@@ -19,7 +19,7 @@ const ProjectsPage = ({ params }: { params: { slug: string } }) => {
   const [features, setFeatures] = useState<IFeature[] | null>(null);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [products, setProducts] = useState<IProduct[] | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   const [error, setError] = useState(false);
   const subproductFeatures = features?.filter(
@@ -30,44 +30,33 @@ const ProjectsPage = ({ params }: { params: { slug: string } }) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get(
-          process.env.NEXT_PUBLIC_BACKEND_URL + `/subproducts/${params.slug}`
-        );
-        setData(response.data);
+        const [subproductResponse, featuresResponse, productsResponse] =
+          await Promise.all([
+            axios.get(
+              `${process.env.NEXT_PUBLIC_BACKEND_URL}/subproducts/${params.slug}`
+            ),
+            axios.get(
+              `${process.env.NEXT_PUBLIC_BACKEND_URL}/admin/dashboard/features`,
+              {
+                headers: { Authorization: `Bearer ${session?.user.token}` },
+              }
+            ),
+            axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/products/`),
+          ]);
+
+        setData(subproductResponse.data);
+        setFeatures(featuresResponse.data);
+        setProducts(productsResponse.data);
       } catch (error) {
         console.error("Error fetching data:", error);
-        throw error;
-      }
-    };
-    const fetchProducts = async () => {
-      const response = await axios.get(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/products/`
-      );
-      setProducts(response.data);
-      setIsLoading(false);
-    };
-    const fetchFeatures = async () => {
-      try {
-        const response = await axios.get(
-          process.env.NEXT_PUBLIC_BACKEND_URL + "/admin/dashboard/features",
-          {
-            headers: {
-              Authorization: `Bearer ${session?.user.token}`,
-            },
-          }
-        );
-        setFeatures(response.data);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-        throw error;
+        setError(true);
+      } finally {
+        setIsLoading(false);
       }
     };
 
     if (session?.user.token) {
       fetchData();
-      fetchFeatures();
-      fetchProducts();
-      setIsLoading(false);
     }
   }, [session?.user.token, params.slug]);
   const {
@@ -257,6 +246,23 @@ const ProjectsPage = ({ params }: { params: { slug: string } }) => {
                       key={specification._id}
                     >
                       {specification.key}
+                    </SelectItem>
+                  )}
+                </Select>
+              )}
+              {data?.applicationIds && (
+                <Select
+                  items={data?.applicationIds}
+                  label="Applications"
+                  color="default"
+                  selectionMode="multiple"
+                  {...register("applicationIds")}
+                  variant="underlined"
+                  placeholder="Select applications"
+                >
+                  {(application) => (
+                    <SelectItem value={application._id} key={application._id}>
+                      {application.title}
                     </SelectItem>
                   )}
                 </Select>
